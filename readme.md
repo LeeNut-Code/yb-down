@@ -1,12 +1,12 @@
-![](src\logo.png)
 # Yb-down 视频下载工具
+
+![](src/logo.png)
+
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.x-blue.svg)](https://www.python.org/)
 [![PySide6](https://img.shields.io/badge/PySide6-6.x-brightgreen.svg)](https://wiki.qt.io/Qt_for_Python)
 [![yt-dlp](https://img.shields.io/badge/yt--dlp-latest-red.svg)](https://github.com/yt-dlp/yt-dlp)
 [![FFmpeg](https://img.shields.io/badge/FFmpeg-required-orange.svg)](https://ffmpeg.org/)
-
-![](src/logo.png)
 
 ## 简介
 
