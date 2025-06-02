@@ -1,29 +1,39 @@
-<h1>📥 Yb-down</h1>
+# 📥 Yb-down 视频下载工具
 
 Yb-down——一个快捷的 <strong>YouTube/哔哩哔哩</strong> 下载器
 
-<center><img src="src\logo.png" style="zoom:40%;" /></center>
+<div align="center">
+  <img src="src\logo.png" style="width:50%;" />
+</div>
 
-<center>
-<img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
-<img src="https://img.shields.io/badge/python-3.x-blue.svg" alt="Python" />
-<img src="https://img.shields.io/badge/PySide6-6.x-brightgreen.svg" alt="PySide6" />
-<img src="https://img.shields.io/badge/yt--dlp-latest-red.svg" alt="yt-dlp" />
-<img src="https://img.shields.io/badge/FFmpeg-required-orange.svg" alt="FFmpeg" />
-</center>
-
----
+<div align="center">
+  <span style="display:inline-block;">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
+  </span>
+  <span style="display:inline-block;">
+    <img src="https://img.shields.io/badge/python-3.x-blue.svg" alt="Python" />
+  </span>
+  <span style="display:inline-block;">
+    <img src="https://img.shields.io/badge/PySide6-6.x-brightgreen.svg" alt="PySide6" />
+  </span>
+  <span style="display:inline-block;">
+    <img src="https://img.shields.io/badge/yt--dlp-latest-red.svg" alt="yt-dlp" />
+  </span>
+  <span style="display:inline-block;">
+    <img src="https://img.shields.io/badge/FFmpeg-required-orange.svg" alt="FFmpeg" />
+  </span>
+</div>
 
 ## 📝 简介
 
 Yb-down 是一个基于 Python 开发的视频下载工具，支持从 YouTube 和哔哩哔哩(B站)下载视频。它提供了一个简洁美观的图形界面，支持多种清晰度选择，并能够显示实时下载进度。
 
+<div align="center">
+  <img src="pic/demo.png" style="width:80%;" />
+</div>
 
-
-![](pic/demo.png)
 <center>⬆️演示图片</center>
 
----
 
 ## ⭐ 功能特点
 
@@ -34,7 +44,6 @@ Yb-down 是一个基于 Python 开发的视频下载工具，支持从 YouTube �
 - 实时下载进度显示
 - 支持 BV号/AV号 直接输入
 
----
 
 ## 🛠️ 安装要求
 - Python 3.x
@@ -45,7 +54,6 @@ Yb-down 是一个基于 Python 开发的视频下载工具，支持从 YouTube �
   - PyYAML
 - 安装Windows terminal，并且将powershell设置为默认终端（因为cmd无法处理此程序的yt-dlp命令）
 
----
 
 ## ⚙️ 配置说明
 此程序不带图形化的设置界面，一切设置在 `settings.yaml` 文件中进行配置：
@@ -55,7 +63,6 @@ Yb-down 是一个基于 Python 开发的视频下载工具，支持从 YouTube �
 代理地址: "http://127.0.0.1:7890"  # 代理服务器地址
 ```
 
----
 
 ## 🔧使用说明
 1. 启动程序
@@ -64,7 +71,6 @@ Yb-down 是一个基于 Python 开发的视频下载工具，支持从 YouTube �
 4. 点击下载按钮开始下载
 5. 等待下载完成
 
----
 
 ## 🔗支持的链接格式
 - YouTube 链接
@@ -75,17 +81,15 @@ Yb-down 是一个基于 Python 开发的视频下载工具，支持从 YouTube �
   - BV号：`BVxxxxx`
   - AV号：`AVxxxxx`
 
----
 
-### 📦打包说明
+## 📦打包说明
 使用 PyInstaller 打包为可执行文件：
 ```bash
 pyinstaller --noconfirm --name "yb-down" --icon "src/ico.ico" --add-data "src/logo.png;." --add-data "settings.yaml;." main.pyw
 ```
 
----
 
-### 🖥️开发时用到的yt-dlp命令参数
+## 🖥️开发时用到的yt-dlp命令参数
 
 **输出音频：**
 
@@ -107,7 +111,6 @@ yt-dlp -f "bestvideo[height<=240]+bestaudio[abr<=64]/best[height<=240]" -o "YT/%
 - 输出工具位置：`--ffmpeg-location "D:\Program Files\ffmpeg\bin"`
 - 输出目录：`-o "YT/%(title)s.%(ext)s"		# 输出到YT目录`
 
----
 
 ## ⚠️ 注意事项
 1. YouTube 下载需要配置正确的代理
@@ -115,7 +118,6 @@ yt-dlp -f "bestvideo[height<=240]+bestaudio[abr<=64]/best[height<=240]" -o "YT/%
 3. 部分视频可能因清晰度（部分视频缺少一些清晰度、哔哩哔哩视频不支持1080p及以上清晰度（因为需要登录了账号的cookie，此软件目前不支持此功能））和版权限制无法下载
 4. **powershell** 必须是默认终端
 
----
 
 ## ❓ 常见问题
 1. YouTube 下载失败
@@ -131,16 +133,13 @@ yt-dlp -f "bestvideo[height<=240]+bestaudio[abr<=64]/best[height<=240]" -o "YT/%
    - 尝试更换代理服务器
    - 选择较低的视频清晰度
 
----
 
 ## 👨‍💻 开发说明
 项目使用 PySide6 开发图形界面，采用多线程处理下载任务，避免界面卡顿。代码结构清晰，易于维护和扩展。
 
----
 
 ## 📜 许可说明
 本项目仅供学习和个人使用，请勿用于商业用途。使用本工具下载视频时，请遵守相关网站的使用条款和版权规定。
 
----
 
-​
+​        
