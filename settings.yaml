@@ -1,4 +1,4 @@
-存储位置: "C:/Users/Administrator/Desktop/"  # 默认存储位置为桌面
+存储位置: "/home/user/下载"  # 或 "./downloads" 表示当前目录下的 downloads 文件夹
 代理模式: "auto"
 代理地址: "http://127.0.0.1:7890"
 清晰度选项:
