@@ -1,6 +1,7 @@
 import os
 import yaml
 import subprocess
+import shutil
 
 class Downloader:
     def __init__(self, settings_path="settings.yaml"):
@@ -20,24 +21,34 @@ class Downloader:
         """下载视频"""
         # 获取存储位置
         output_dir = self.settings.get('存储位置', 'YT')
-        
-        # 确保输出目录存在
         os.makedirs(output_dir, exist_ok=True)
-        
-        # 根据URL判断是否需要代理
+
+        # 检查 yt-dlp 路径
+        ytdlp_path = shutil.which('yt-dlp')
+        if not ytdlp_path:
+            # 尝试查找本地根目录下的 yt-dlp
+            local_ytdlp = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'yt-dlp')
+            if os.path.isfile(local_ytdlp) and os.access(local_ytdlp, os.X_OK):
+                ytdlp_path = local_ytdlp
+            else:
+                raise Exception("未找到 yt-dlp，请确保已安装或将 yt-dlp 可执行文件放在软件根目录。")
+
+        # 检查 ffmpeg 路径（根目录下）
+        ffmpeg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ffmpeg')
+        ffmpeg_args = []
+        if os.path.isfile(ffmpeg_path) and os.access(ffmpeg_path, os.X_OK):
+            ffmpeg_args = ['--ffmpeg-location', ffmpeg_path]
+
+        # 代理设置
         proxy_mode = self.settings.get('代理模式', 'auto')
         proxy_url = self.settings.get('代理地址', '')
         proxy_args = []
-        
-        # 判断是否为YouTube链接
         is_youtube = 'youtube.com' in url.lower() or 'youtu.be' in url.lower()
-        
-        # YouTube需要代理，B站不需要
         if is_youtube and proxy_mode.lower() != 'none' and proxy_url:
             if proxy_url.startswith(('http://', 'https://', 'socks5://')):
                 proxy_args = ['--proxy', proxy_url]
-        
-        # 根据清晰度设置下载参数
+
+        # 清晰度参数
         if quality.startswith('仅音频'):
             abr = '64' if '64k' in quality else '128'
             format_args = [
@@ -50,36 +61,28 @@ class Downloader:
                 '-f', f'bestvideo[height<={height}]+bestaudio[abr<=128]/best[height<={height}]',
                 '--merge-output-format', 'mp4'
             ]
-    
-        # 构建完整的命令
+
+        # 构建命令
         command = [
-            'yt-dlp',
+            ytdlp_path,
             *format_args,
             '-o', os.path.join(output_dir, '%(title)s.%(ext)s'),
-            '--ffmpeg-location', '.',
-            '--socket-timeout', '60',  # 增加超时时间
-            '--retries', '10',         # 增加重试次数
-            '--fragment-retries', '10', # 增加分片重试次数
-            '--concurrent-fragments', '4', # 并发下载分片
-            *proxy_args,               # 只在需要时添加代理参数
+            '--socket-timeout', '60',
+            '--retries', '10',
+            '--fragment-retries', '10',
+            '--concurrent-fragments', '4',
+            *ffmpeg_args,
+            *proxy_args,
             url
         ]
 
-        # 创建进程并实时获取输出
-        startupinfo = None
-        if os.name == 'nt':  # Windows系统
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            startupinfo.wShowWindow = subprocess.SW_HIDE
-
-        # 使用修改后的进程创建参数
+        # 启动进程
         process = subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             universal_newlines=True,
-            bufsize=1,
-            startupinfo=startupinfo  # 添加startupinfo参数
+            bufsize=1
         )
 
         # 读取输出并通过回调函数发送进度
@@ -90,6 +93,5 @@ class Downloader:
             if output and self.progress_callback:
                 self.progress_callback(output.strip())
 
-        # 检查下载是否成功
         if process.returncode != 0:
             raise Exception("下载失败")
