@@ -1,12 +1,20 @@
 import sys
+import os
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QLabel, QLineEdit, QComboBox, QPushButton, QVBoxLayout, QWidget, QMessageBox,
-    QProgressBar, QStatusBar, QMenu  # 添加 QMenu 导入
+    QProgressBar, QStatusBar, QMenu
 )
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtCore import Qt, QThread, Signal
 
 from downloader import Downloader
+
+def resource_path(relative_path):
+    """获取资源文件的绝对路径，兼容开发环境和PyInstaller打包环境"""
+    if hasattr(sys, '_MEIPASS'):
+        # PyInstaller打包后的临时目录
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 class CustomLineEdit(QLineEdit):
     def __init__(self, *args, **kwargs):
@@ -80,7 +88,13 @@ class VideoDownloaderApp(QMainWindow):
         # 设置窗口属性
         self.setWindowTitle("Yb-down")
         self.setGeometry(100, 100, 600, 400)
-        self.setWindowIcon(QIcon("src/ico.ico"))
+
+        # 适配 Linux/Windows 图标路径
+        icon_path = os.path.join("src", "ico.ico")
+        if not os.path.exists(icon_path):
+            icon_path = os.path.join("src", "ico.png")  # Linux 下可用 png 作为图标
+        self.setWindowIcon(QIcon(icon_path))
+
         self.setStyleSheet("""
             QMainWindow, QWidget {
                 background-color: #1e1e1e;
@@ -99,8 +113,8 @@ class VideoDownloaderApp(QMainWindow):
 
         # 替换标题为Logo图像
         self.logo_label = QLabel()
-        pixmap = QPixmap("src/logo.png")
-        # 保持纵横比缩放图片以适应窗口宽度
+        logo_path = resource_path(os.path.join("src", "logo.png"))
+        pixmap = QPixmap(logo_path)
         scaled_pixmap = pixmap.scaled(260, 65, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.logo_label.setPixmap(scaled_pixmap)
         self.logo_label.setAlignment(Qt.AlignCenter)
@@ -298,14 +312,21 @@ class VideoDownloaderApp(QMainWindow):
             self.progress_bar.setValue(0)
             self.progress_bar.show()
             self.status_label.setText("正在准备下载...")
-            downloader = Downloader(settings_path="settings.yaml")
-            
+
+            # 适配 Linux 下 settings.yaml 路径
+            settings_path = "settings.yaml"
+            if not os.path.exists(settings_path):
+                # 尝试在当前目录下查找
+                settings_path = os.path.join(os.path.dirname(__file__), "settings.yaml")
+
+            downloader = Downloader(settings_path=settings_path)
+
             # 创建并启动下载线程
             self.download_thread = DownloadThread(downloader, video_link, quality)
             self.download_thread.finished.connect(self.on_download_finished)
             self.download_thread.progress.connect(self.update_progress)
             self.download_thread.start()
-            
+
         except Exception as e:
             self.download_button.setEnabled(True)
             self.progress_bar.hide()
