@@ -1,6 +1,7 @@
 # 📥 Yb-down 视频下载工具
 
 Yb-down——一个快捷的 <strong>YouTube/哔哩哔哩</strong> 下载器
+>此程序支持linux、windows10+ 等系统，切换分支，查看其他系统的版本
 
 <div align="center">
   <img src="src\logo.png" style="width:50%;" />
