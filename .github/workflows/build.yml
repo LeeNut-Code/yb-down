@@ -34,8 +34,8 @@ jobs:
 
     - name: 下载ffmpeg
       run: |
-        # 下载FFmpeg压缩包
-        Invoke-WebRequest -Uri https://github.com/GyanD/codexffmpeg/releases/latest/download/ffmpeg-release-essentials.zip -OutFile ffmpeg.zip
+        # 下载FFmpeg压缩包 - 使用更可靠的链接
+        Invoke-WebRequest -Uri https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip -OutFile ffmpeg.zip
         # 解压并获取ffmpeg.exe
         Expand-Archive ffmpeg.zip -DestinationPath ffmpeg_temp
         # 查找并复制ffmpeg.exe
