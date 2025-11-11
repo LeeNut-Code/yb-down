@@ -1,14 +1,17 @@
 import sys
-from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QLabel, QLineEdit, QComboBox, QPushButton, QVBoxLayout, QWidget, QMessageBox,
-    QProgressBar, QStatusBar, QMenu  # 添加 QMenu 导入
+import os
+from PyQt5.QtWidgets import (QApplication, QVBoxLayout, QWidget, QMessageBox, QMenu)
+from PyQt5.QtCore import Qt, QThread, pyqtSignal as Signal, QPoint, QUrl
+from PyQt5.QtGui import QDesktopServices
+from qfluentwidgets import (
+    FluentWindow, FluentIcon, setTheme, Theme, ComboBox, PushButton, 
+    LineEdit, ProgressBar, SubtitleLabel, setFont, FluentBackgroundTheme,
+    NavigationItemPosition, MessageBox, ToggleButton, NavigationPushButton
 )
-from PySide6.QtGui import QIcon, QPixmap
-from PySide6.QtCore import Qt, QThread, Signal
 
 from downloader import Downloader
 
-class CustomLineEdit(QLineEdit):
+class CustomLineEdit(LineEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -73,207 +76,134 @@ class DownloadThread(QThread):
         except Exception as e:
             self.finished.emit(False, str(e))
 
-class VideoDownloaderApp(QMainWindow):
+class VideoDownloaderApp(FluentWindow):
     def __init__(self):
         super().__init__()
+        # 设置主题为深色
+        setTheme(Theme.DARK)
 
         # 设置窗口属性
-        self.setWindowTitle("Yb-down")
-        self.setGeometry(100, 100, 600, 400)
-        self.setWindowIcon(QIcon("src/ico.ico"))
-        self.setStyleSheet("""
-            QMainWindow, QWidget {
-                background-color: #1e1e1e;
-                color: #ffffff;
-            }
-        """)
-
-        # 主窗口部件
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-
+        self.window_title = "Yb-down"
+        self.window_size = (600, 468)
+        self.setWindowTitle(self.window_title)
+        self.resize(*self.window_size)
+        # 禁止调节窗口大小，禁止最大化，且不显示最大化按钮
+        self.setFixedSize(*self.window_size)
+        # 使用更明确的窗口标志设置，只允许关闭和最小化按钮
+        self.setWindowFlags(Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
+        # 隐藏导航栏
+        self.navigationInterface.hide()
+        # 调整内容区域边距，移除左侧导航栏占用的空间
+        self.stackedWidget.setContentsMargins(0, 0, 0, 0)
+        
+        # 创建主界面
+        self.mainWidget = QWidget()
+        self.mainWidget.setObjectName('mainInterface')
         # 布局
-        layout = QVBoxLayout(self.central_widget)
-        layout.setContentsMargins(40, 40, 40, 40)
-        layout.setSpacing(20)
-
-        # 替换标题为Logo图像
+        self.layout = QVBoxLayout(self.mainWidget)
+        self.layout.setContentsMargins(40, 30, 40, 30)
+        self.layout.setSpacing(0)  # 将默认间距设为0，以便精确控制各组件间距
+        
+        # 添加主界面到窗口
+        self.addSubInterface(self.mainWidget, FluentIcon.HOME, '下载')
+        
+        # 创建右上角的主题切换按钮
+        from PyQt5.QtWidgets import QHBoxLayout
+        
+        # Logo和主题切换按钮的水平布局
+        from PyQt5.QtGui import QPixmap, QIcon
+        from PyQt5.QtWidgets import QLabel, QHBoxLayout
+        
+        # 设置窗口图标
+        self.setWindowIcon(QIcon("src/ico.ico"))
+        
+        # 创建顶部水平布局，仅包含Logo
+        self.top_horizontal_layout = QHBoxLayout()
+        
+        # 添加左侧弹性空间
+        self.top_horizontal_layout.addStretch()
+        
+        # Logo显示
         self.logo_label = QLabel()
         pixmap = QPixmap("src/logo.png")
-        # 保持纵横比缩放图片以适应窗口宽度
-        scaled_pixmap = pixmap.scaled(260, 65, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        # 保持纵横比缩放图片
+        scaled_pixmap = pixmap.scaled(250, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.logo_label.setPixmap(scaled_pixmap)
-        self.logo_label.setAlignment(Qt.AlignCenter)
-        self.logo_label.setStyleSheet("""
-            QLabel {
-                margin-bottom: 20px;
-            }
-        """)
-        layout.addWidget(self.logo_label)
+        self.logo_label.setAlignment(Qt.AlignCenter)  # 居中对齐
+        
+        # 添加Logo到水平布局（中间位置）
+        self.top_horizontal_layout.addWidget(self.logo_label)
+        
+        # 添加右侧弹性空间
+        self.top_horizontal_layout.addStretch()
+        
+        # 将水平布局添加到主布局的顶部
+        self.layout.addLayout(self.top_horizontal_layout)
+        # logo和请输入链接文字之间的间距是50
+        self.layout.addSpacing(50)
 
         # 视频链接输入框
-        self.link_label = QLabel("请输入视频链接或 BV/AV 号:")
-        self.link_label.setStyleSheet("""
-            QLabel {
-                color: #ffffff;
-                font-size: 14px;
-                font-weight: bold;
-                margin-bottom: 5px;
-            }
-        """)
-        layout.addWidget(self.link_label)
+        self.link_label = SubtitleLabel("请输入哔哩哔哩视频链接或 BV/AV 号:")
+        setFont(self.link_label, 14)
+        self.layout.addWidget(self.link_label)
+        # 请输入链接与输入框之间是25
+        self.layout.addSpacing(25)
 
         # 替换原来的 QLineEdit 为自定义的 CustomLineEdit
         self.link_entry = CustomLineEdit()
         self.link_entry.setPlaceholderText("在此输入视频链接或 BV/AV 号...")
-        self.link_entry.setStyleSheet("""
-            QLineEdit {
-                background-color: #2d2d2d;
-                border: 1px solid #3d3d3d;
-                border-radius: 15px;
-                color: #ffffff;
-                padding: 12px;
-                font-size: 14px;
-            }
-            QLineEdit:focus {
-                border: 2px solid #0078d4;
-                background-color: #3d3d3d;
-            }
-            QLineEdit:hover {
-                background-color: #3d3d3d;
-                border: 1px solid #4d4d4d;
-            }
-        """)
-        layout.addWidget(self.link_entry)
+        self.link_entry.setFixedHeight(40)
+        self.layout.addWidget(self.link_entry)
+        # 输入框和选择清晰度文字之间是20
+        self.layout.addSpacing(20)
 
         # 清晰度选择
-        self.quality_label = QLabel("选择清晰度:")
-        self.quality_label.setStyleSheet("""
-            QLabel {
-                color: #ffffff;
-                font-size: 14px;
-                font-weight: bold;
-                margin-bottom: 5px;
-            }
-        """)
-        layout.addWidget(self.quality_label)
+        self.quality_label = SubtitleLabel("选择清晰度:")
+        setFont(self.quality_label, 14)
+        self.layout.addWidget(self.quality_label)
+        # 选择清晰度与下拉菜单之间是20
+        self.layout.addSpacing(20)
 
-        self.quality_menu = QComboBox()
-        self.quality_menu.addItems(["144p", "240p", "360p", "480p", "720p", "1080p", "仅音频 64k", "仅音频 128k"])
-        self.quality_menu.setStyleSheet("""
-            QComboBox {
-                background-color: #2d2d2d;
-                border: 1px solid #3d3d3d;
-                border-radius: 15px;
-                color: #ffffff;
-                padding: 8px;
-                font-size: 14px;
-                min-height: 20px;
-                padding-right: 20px;
-            }
-            QComboBox:hover {
-                background-color: #3d3d3d;
-                border: 1px solid #4d4d4d;
-            }
-            QComboBox:focus {
-                border: 2px solid #0078d4;
-            }
-            QComboBox::drop-down {
-                border: none;
-                width: 30px;
-                border-top-right-radius: 8px;
-                border-bottom-right-radius: 8px;
-            }
-            QComboBox::down-arrow {
-                image: none;
-                border-left: 5px solid transparent;
-                border-right: 5px solid transparent;
-                border-top: 5px solid #ffffff;
-                margin-right: 10px;
-            }
-            QComboBox QAbstractItemView {
-                background-color: #2d2d2d;
-                border: 1px solid #3d3d3d;
-                border-radius: 15px;
-                selection-background-color: #0078d4;
-                selection-color: #ffffff;
-                padding: 4px;
-            }
-        """)
-        layout.addWidget(self.quality_menu)
+        self.quality_menu = ComboBox()
+        self.quality_menu.addItems(["360p", "480p", "720p", "1080p", "仅音频 64k", "仅音频 128k"])
+        self.quality_menu.setFixedHeight(40)
+        self.layout.addWidget(self.quality_menu)
+        # 下拉菜单与下载按钮之间是15
+        self.layout.addSpacing(15)
 
         # 下载按钮
-        self.download_button = QPushButton("下载")
-        self.download_button.setStyleSheet("""
-            QPushButton {
-                background-color: #0078d4;
-                border: none;
-                border-radius: 15px;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 12px;
-                min-width: 120px;
-            }
-            QPushButton:hover {
-                background-color: #1084d8;
-            }
-            QPushButton:pressed {
-                background-color: #006cbd;
-            }
-        """)
+        self.download_button = PushButton()
+        self.download_button.setText("下载")
+        self.download_button.setFixedHeight(40)
+        self.download_button.setFixedWidth(120)
         self.download_button.clicked.connect(self.download_video)
-        layout.addWidget(self.download_button, alignment=Qt.AlignCenter)
+        self.layout.addWidget(self.download_button, alignment=Qt.AlignCenter)
 
-        # 添加弹性空间
-        layout.addStretch()
+        # 添加状态显示区域
+        self.statusWidget = QWidget()
+        self.statusWidget.setFixedHeight(40)  # 减小状态显示区域的高度
+        self.statusLayout = QVBoxLayout(self.statusWidget)
+        self.statusLayout.setContentsMargins(0, 0, 0, 0)
+        
+        # 状态文本
+        self.status_label = SubtitleLabel("就绪")
+        setFont(self.status_label, 12)
+        self.statusLayout.addWidget(self.status_label)
+        
+        self.layout.addWidget(self.statusWidget)
+        
+        # 添加底部弹性空间
+        self.layout.addStretch()
+        
+        # 添加进度条到最下面，贴合窗口下部边缘
+        self.progress_bar = ProgressBar()
+        self.progress_bar.setFixedHeight(15)  # 减小进度条高度
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setValue(0)  # 设置初始值为0%
+        # 不再隐藏进度条，始终显示
+        self.layout.addWidget(self.progress_bar, alignment=Qt.AlignBottom)
+        
 
-        # 添加状态栏（修正缩进）
-        self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
-        self.status_bar.setStyleSheet("""
-            QStatusBar {
-                background-color: #1e1e1e;
-                color: #ffffff;
-                border-top: 1px solid #3d3d3d;
-                min-height: 25px;
-                padding: 3px;
-            }
-        """)
-        
-        # 添加状态文本标签
-        self.status_label = QLabel("就绪")
-        self.status_label.setStyleSheet("""
-            QLabel {
-                color: #ffffff;
-                margin-right: 10px;
-            }
-        """)
-        self.status_bar.addWidget(self.status_label)
-        
-        # 添加进度条（修正缩进）
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setTextVisible(True)
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setMaximum(100)
-        self.progress_bar.setFixedHeight(20)  # 设置固定高度
-        self.progress_bar.setMinimumWidth(200)  # 设置最小宽度
-        self.progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 1px solid #3d3d3d;
-                border-radius: 5px;
-                text-align: center;
-                background-color: #2d2d2d;
-                color: white;
-                margin-right: 5px;  /* 添加右边距 */
-            }
-            QProgressBar::chunk {
-                background-color: #0078d4;
-                border-radius: 5px;
-            }
-        """)
-        self.status_bar.addPermanentWidget(self.progress_bar)
-        self.progress_bar.hide()  # 初始时隐藏进度条
 
     def download_video(self):
         video_link = self.link_entry.text().strip()
@@ -298,10 +228,11 @@ class VideoDownloaderApp(QMainWindow):
             self.progress_bar.setValue(0)
             self.progress_bar.show()
             self.status_label.setText("正在准备下载...")
-            downloader = Downloader(settings_path="settings.yaml")
+            # 将downloader保存为类成员变量，避免被垃圾回收
+            self.downloader = Downloader(settings_path="settings.yaml")
             
             # 创建并启动下载线程
-            self.download_thread = DownloadThread(downloader, video_link, quality)
+            self.download_thread = DownloadThread(self.downloader, video_link, quality)
             self.download_thread.finished.connect(self.on_download_finished)
             self.download_thread.progress.connect(self.update_progress)
             self.download_thread.start()
@@ -309,7 +240,9 @@ class VideoDownloaderApp(QMainWindow):
         except Exception as e:
             self.download_button.setEnabled(True)
             self.progress_bar.hide()
-            QMessageBox.critical(self, "错误", f"下载失败: {str(e)}")
+            # 使用Fluent风格的错误消息框
+            w = MessageBox("错误", f"下载失败: {str(e)}", self)
+            w.exec_()
 
     def update_progress(self, output):
         try:
@@ -340,10 +273,12 @@ class VideoDownloaderApp(QMainWindow):
 
     def on_download_finished(self, success, error_message):
         self.download_button.setEnabled(True)
-        self.progress_bar.hide()
+        # 不再隐藏进度条，始终保持可见
         if success:
             self.status_label.setText("下载完成")
-            QMessageBox.information(self, "成功", "视频下载完成！")
+            # 创建Fluent风格的消息框，只显示完成按钮
+            msg_box = MessageBox("成功", "视频下载完成！", self)
+            msg_box.show()
         else:
             error_text = "下载失败"
             if "timeout" in error_message.lower():
@@ -351,10 +286,71 @@ class VideoDownloaderApp(QMainWindow):
             elif "unavailable" in error_message.lower():
                 error_text = "视频不可用或已被删除"
             self.status_label.setText(error_text)
-            QMessageBox.critical(self, "错误", f"下载失败: {error_message}")
+            # 使用Fluent风格的错误消息框
+            w = MessageBox("错误", f"下载失败: {error_message}", self)
+            w.exec_()
+        # 下载结束后重置进度条状态为空闲状态
+        self.progress_bar.setValue(0)
+        # 设置状态为就绪，类似获取视频信息前的状态
+        self.status_label.setText("就绪")
+    
+    def open_video_directory(self):
+        """打开视频下载目录"""
+        try:
+            # 从Downloader实例获取存储位置
+            # 注意：这里假设self.downloader是一个已初始化的Downloader实例
+            if hasattr(self, 'downloader') and hasattr(self.downloader, 'settings'):
+                output_dir = self.downloader.settings.get('存储位置', '')
+                if output_dir and os.path.exists(output_dir):
+                    # 跨平台打开目录
+                    if sys.platform.startswith('darwin'):  # macOS
+                        os.system(f'open "{output_dir}"')
+                    elif sys.platform.startswith('win'):  # Windows
+                        os.system(f'explorer "{output_dir}"')
+                    else:  # Linux
+                        os.system(f'xdg-open "{output_dir}"')
+                else:
+                    # 如果目录不存在，显示错误消息
+                    w = MessageBox("错误", "无法找到下载目录", self)
+                    w.exec_()
+            else:
+                # 如果无法获取下载器实例，尝试从设置文件读取
+                import yaml
+                try:
+                    with open("settings.yaml", 'r', encoding='utf-8') as f:
+                        settings = yaml.safe_load(f)
+                        output_dir = settings.get('存储位置', '')
+                        if output_dir and os.path.exists(output_dir):
+                            # 使用QDesktopServices打开目录
+                            QDesktopServices.openUrl(QUrl.fromLocalFile(output_dir))
+                except Exception:
+                    w = MessageBox("错误", "无法获取下载目录信息", self)
+                    w.exec_()
+        except Exception as e:
+            w = MessageBox("错误", f"无法打开目录: {str(e)}", self)
+            w.exec_()
+    
+    # 移除主题切换功能相关方法
+    # def update_theme_button_text(self):
+    #     """根据当前主题更新按钮文本"""
+    #     if isDarkTheme():
+    #         self.theme_toggle.setToolTip('切换到浅色主题')
+    #     else:
+    #         self.theme_toggle.setToolTip('切换到深色主题')
+    # 
+    # def toggle_theme(self):
+    #     """切换深色/浅色主题"""
+    #     toggleTheme()  # 使用内置的toggleTheme函数切换主题
+    #     self.update_theme_button_text()  # 更新按钮文本
 
 if __name__ == "__main__":
+    # 启用高DPI缩放
+    QApplication.setHighDpiScaleFactorRoundingPolicy(
+        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    
     app = QApplication(sys.argv)
     window = VideoDownloaderApp()
     window.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())

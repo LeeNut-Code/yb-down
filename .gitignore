@@ -1,0 +1,45 @@
+# 可执行文件
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 构建产物
+/build/
+/dist/
+*.spec
+
+# 环境
+.env
+.env.local
+.env.*.local
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+
+# 项目特定文件
+# 忽略下载器可执行文件
+yt-dlp.exe
+ffmpeg.exe

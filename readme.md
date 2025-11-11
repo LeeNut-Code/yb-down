@@ -15,7 +15,10 @@ Yb-down——一个快捷的 <strong>YouTube/哔哩哔哩</strong> 下载器
     <img src="https://img.shields.io/badge/python-3.x-blue.svg" alt="Python" />
   </span>
   <span style="display:inline-block;">
-    <img src="https://img.shields.io/badge/PySide6-6.x-brightgreen.svg" alt="PySide6" />
+    <img src="https://img.shields.io/badge/PyQt5-5.x-brightgreen.svg" alt="PyQt5" />
+  </span>
+  <span style="display:inline-block;">
+    <img src="https://img.shields.io/badge/qfluentwidgets-latest-yellow.svg" alt="qfluentwidgets" />
   </span>
   <span style="display:inline-block;">
     <img src="https://img.shields.io/badge/yt--dlp-latest-red.svg" alt="yt-dlp" />
@@ -51,7 +54,8 @@ Yb-down 是一个基于 Python 开发的视频下载工具，支持从 YouTube �
 - FFmpeg（用于视频处理）
 - yt-dlp（用于下载视频）
 - 依赖包：
-  - PySide6
+  - PyQt5
+  - qfluentwidgets
   - PyYAML
 - 安装Windows terminal，并且将powershell设置为默认终端（因为cmd无法处理此程序的yt-dlp命令）
 
@@ -59,9 +63,29 @@ Yb-down 是一个基于 Python 开发的视频下载工具，支持从 YouTube �
 ## ⚙️ 配置说明
 此程序不带图形化的设置界面，一切设置在 `settings.yaml` 文件中进行配置：
 ```yaml
-存储位置: "downloads"  # 下载文件保存位置
-代理模式: "auto"     # 代理模式：manual/auto/none
-代理地址: "http://127.0.0.1:7890"  # 代理服务器地址
+# 存储位置: 下载视频的保存目录
+# 格式: 绝对路径，使用正斜杠(/)或双反斜杠(\\)
+存储位置: "C:/Users/Administrator/Desktop/"  # 默认存储位置为桌面
+
+# 代理模式: 网络请求的代理设置
+# 可选值: "auto"(自动检测), "on"(启用), "off"(禁用)
+代理模式: "auto"
+
+# 代理地址: 代理服务器的地址
+# 格式: "http://ip:port" 或 "socks5://ip:port"
+代理地址: "http://127.0.0.1:7890"
+
+# 清晰度选项: 界面中显示的清晰度列表
+清晰度选项:
+  - "360p"     # 360P 流畅
+  - "480p"     # 480P 清晰
+  - "720p"     # 720P 高清
+  - "1080p"    # 1080P 高清
+  - "仅音频 64k"  # 低质量音频
+  - "仅音频 128k" # 标准质量音频
+
+# 默认清晰度: 程序启动时默认选中的清晰度选项
+默认清晰度: "360p"
 ```
 
 
@@ -70,7 +94,7 @@ Yb-down 是一个基于 Python 开发的视频下载工具，支持从 YouTube �
 2. 在输入框中粘贴视频链接或输入 BV/AV 号
 3. 选择所需的清晰度/音质
 4. 点击下载按钮开始下载
-5. 等待下载完成
+5. 等待下载完成，完成后将显示提示窗口
 
 
 ## 🔗支持的链接格式
@@ -136,11 +160,11 @@ yt-dlp -f "bestvideo[height<=240]+bestaudio[abr<=64]/best[height<=240]" -o "YT/%
 
 
 ## 👨‍💻 开发说明
-项目使用 PySide6 开发图形界面，采用多线程处理下载任务，避免界面卡顿。代码结构清晰，易于维护和扩展。
+项目使用 PyQt5 和 qfluentwidgets 开发图形界面，采用多线程处理下载任务，避免界面卡顿。代码结构清晰，易于维护和扩展。下载完成后会显示提示窗口告知用户下载已完成。
 
 
 ## 📜 许可说明
 本项目仅供学习和个人使用，请勿用于商业用途。使用本工具下载视频时，请遵守相关网站的使用条款和版权规定。
 
 
-​        
+​
