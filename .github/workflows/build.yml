@@ -1,0 +1,70 @@
+name: 自动构建发布
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: 设置Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller PyQt5 PyYAML qfluentwidgets
+
+    - name: 下载yt-dlp.exe
+      run: |
+        Invoke-WebRequest -Uri https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe -OutFile yt-dlp.exe
+
+    - name: 下载ffmpeg
+      run: |
+        # 下载FFmpeg压缩包
+        Invoke-WebRequest -Uri https://github.com/GyanD/codexffmpeg/releases/latest/download/ffmpeg-release-essentials.zip -OutFile ffmpeg.zip
+        # 解压并获取ffmpeg.exe
+        Expand-Archive ffmpeg.zip -DestinationPath ffmpeg_temp
+        # 查找并复制ffmpeg.exe
+        $ffmpegExe = Get-ChildItem -Path ffmpeg_temp -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+        Copy-Item $ffmpegExe.FullName .
+        # 清理临时文件
+        Remove-Item -Recurse -Force ffmpeg_temp, ffmpeg.zip
+
+    - name: 构建可执行文件
+      run: |
+        pyinstaller --noconfirm --onedir --windowed --icon=src/ico.ico --add-data "yt-dlp.exe;." --add-data "ffmpeg.exe;." --add-data "settings.yaml;." --add-data "src/*;src/" --add-data "pic/*;pic/" main.pyw
+
+    - name: 准备发布文件
+      run: |
+        # 创建发布目录
+        New-Item -ItemType Directory -Force -Path release
+        # 复制构建产物到发布目录
+        Copy-Item -Recurse -Force dist/main/* release/
+        # 压缩发布文件
+        Compress-Archive -Path release/* -DestinationPath yb-down-release.zip
+
+    - name: 创建GitHub Release
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: yb-down-release.zip
+        generate_release_notes: true
+
+    - name: 上传构建产物
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v3
+      with:
+        name: yb-down-build
+        path: yb-down-release.zip
