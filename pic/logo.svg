@@ -1,0 +1,63 @@
+<svg class="anime-girl" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cat Body -->
+    <ellipse cx="100" cy="115" rx="35" ry="30" fill="#E8E8E8"/>
+    
+    <!-- Cat Head -->
+    <ellipse cx="100" cy="75" rx="45" ry="40" fill="#F5F5F5"/>
+    
+    <!-- Cat Ears -->
+    <path d="M65 50 L55 20 L85 45 Z" fill="#F5F5F5"/>
+    <path d="M135 50 L145 20 L115 45 Z" fill="#F5F5F5"/>
+    <!-- Inner Ears -->
+    <path d="M68 45 L62 28 L80 43 Z" fill="#FFB6C1"/>
+    <path d="M132 45 L138 28 L120 43 Z" fill="#FFB6C1"/>
+    
+    <!-- Cat Eyes -->
+    <ellipse cx="82" cy="72" rx="10" ry="12" fill="#4A3728"/>
+    <ellipse cx="118" cy="72" rx="10" ry="12" fill="#4A3728"/>
+    <!-- Eye highlights -->
+    <circle cx="85" cy="68" r="4" fill="white"/>
+    <circle cx="121" cy="68" r="4" fill="white"/>
+    <circle cx="79" cy="76" r="2" fill="white" opacity="0.5"/>
+    <circle cx="115" cy="76" r="2" fill="white" opacity="0.5"/>
+    
+    <!-- Cat Nose -->
+    <path d="M96 85 L104 85 L100 90 Z" fill="#FFB6C1"/>
+    
+    <!-- Cat Mouth -->
+    <path d="M100 90 L100 95" stroke="#4A3728" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M95 93 Q100 98 105 93" stroke="#4A3728" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    
+    <!-- Cat Whiskers -->
+    <line x1="55" y1="80" x2="75" y2="85" stroke="#999" stroke-width="1" opacity="0.6"/>
+    <line x1="55" y1="88" x2="75" y2="88" stroke="#999" stroke-width="1" opacity="0.6"/>
+    <line x1="55" y1="96" x2="75" y2="91" stroke="#999" stroke-width="1" opacity="0.6"/>
+    <line x1="145" y1="80" x2="125" y2="85" stroke="#999" stroke-width="1" opacity="0.6"/>
+    <line x1="145" y1="88" x2="125" y2="88" stroke="#999" stroke-width="1" opacity="0.6"/>
+    <line x1="145" y1="96" x2="125" y2="91" stroke="#999" stroke-width="1" opacity="0.6"/>
+    
+    <!-- Blush -->
+    <ellipse cx="70" cy="85" rx="8" ry="5" fill="#FFB6C1" opacity="0.5"/>
+    <ellipse cx="130" cy="85" rx="8" ry="5" fill="#FFB6C1" opacity="0.5"/>
+    
+    <!-- Cat Paws holding download icon -->
+    <ellipse cx="75" cy="110" rx="10" ry="8" fill="#F5F5F5"/>
+    <ellipse cx="125" cy="110" rx="10" ry="8" fill="#F5F5F5"/>
+    
+    <!-- Download Icon (between paws) -->
+    <circle cx="100" cy="105" r="18" fill="#02DFF8" filter="drop-shadow(0 2px 8px rgba(2, 223, 248, 0.5))"/>
+    <path d="M100 96 L100 110 M94 104 L100 110 L106 104" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M92 114 L108 114" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Cat Tail -->
+    <path d="M130 120 Q160 110 165 85 Q170 60 155 55" stroke="#F5F5F5" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <path d="M130 120 Q160 110 165 85 Q170 60 155 55" stroke="#E0E0E0" stroke-width="8" fill="none" stroke-linecap="round"/>
+    
+    <!-- Sparkles -->
+    <g opacity="0.8">
+      <path d="M25 60 L27 65 L32 67 L27 69 L25 74 L23 69 L18 67 L23 65 Z" fill="#FFD700"/>
+      <path d="M170 40 L171 43 L174 44 L171 45 L170 48 L169 45 L166 44 L169 43 Z" fill="#FFD700"/>
+      <path d="M175 95 L176 98 L179 104 L176 105 L175 108 L174 105 L171 104 L174 98 Z" fill="#02DFF8"/>
+      <path d="M40 110 L41 113 L44 114 L41 115 L40 118 L39 115 L36 114 L39 113 Z" fill="#02DFF8"/>
+    </g>
+  </svg>

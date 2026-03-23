@@ -1,0 +1,62 @@
+const fs = require('fs');
+
+const packageJson = {
+  "name": "yb-down",
+  "version": "2.0.0",
+  "description": "A fast YouTube/Bilibili downloader",
+  "main": "main.js",
+  "author": "LeeNut-code",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable",
+    "package": "electron-builder --win portable"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^24.13.3",
+    "electron": "^28.0.0",
+    "electron-packager": "^17.1.2"
+  },
+  "build": {
+    "appId": "com.ybdown.app",
+    "productName": "Yb-down",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "settings.html",
+      "yt-dlp.exe",
+      "ffmpeg.exe",
+      "pic/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "pic/ico.ico"
+    },
+    "asarUnpack": [
+      "yt-dlp.exe",
+      "ffmpeg.exe"
+    ],
+    "linux": {
+      "target": ["AppImage", "deb", "rpm"],
+      "executableName": "yb-down"
+    },
+    "afterPack": "build.js"
+  }
+};
+
+// 使用utf8编码写入，确保没有BOM
+fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2), 'utf8');
+console.log('package.json created successfully without BOM');

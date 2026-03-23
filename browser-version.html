@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yb-down 媒体下载器 (浏览器版本)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #212121;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .header {
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      background: linear-gradient(45deg, #1E88E5, #64B5F6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .input-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #B0BEC5;
+    }
+
+    input[type="text"] {
+      padding: 12px;
+      border: 1px solid #455A64;
+      border-radius: 8px;
+      background-color: #263238;
+      color: #ffffff;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #1E88E5;
+      box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+    }
+
+    .select-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    select {
+      padding: 12px;
+      border: 1px solid #455A64;
+      border-radius: 8px;
+      background-color: #263238;
+      color: #ffffff;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #1E88E5;
+      box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+    }
+
+    .button-section {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 14px 40px;
+      background-color: #1E88E5;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #1976D2;
+      box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
+    }
+
+    button:disabled {
+      background-color: #455A64;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .progress-section {
+      margin-top: 20px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background-color: #37474F;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: #1E88E5;
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+
+    .environment-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #263238;
+      border-radius: 8px;
+    }
+
+    .environment-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .status-good {
+      color: #4CAF50;
+    }
+
+    .status-bad {
+      color: #F44336;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 14px;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+
+    .notification-success {
+      background-color: #4CAF50;
+    }
+
+    .notification-error {
+      background-color: #F44336;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    .instructions {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #263238;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .instructions h3 {
+      margin-bottom: 10px;
+      color: #1E88E5;
+    }
+
+    .instructions ul {
+      list-style-type: disc;
+      margin-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">Yb-down</div>
+      <p>一个快捷的 YouTube/哔哩哔哩 下载器</p>
+    </div>
+
+    <div class="input-section">
+      <label for="url">请输入视频链接或 BV/AV 号:</label>
+      <input type="text" id="url" placeholder="例如: https://www.youtube.com/watch?v=xxx 或 BV1xxxxx">
+    </div>
+
+    <div class="select-section">
+      <label for="quality">选择清晰度:</label>
+      <select id="quality">
+        <option value="360p">360p</option>
+        <option value="480p">480p</option>
+        <option value="720p">720p</option>
+        <option value="1080p">1080p</option>
+        <option value="仅音频 64k">仅音频 64k</option>
+        <option value="仅音频 128k">仅音频 128k</option>
+      </select>
+    </div>
+
+    <div class="button-section">
+      <button id="download-btn">生成下载命令</button>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-info">
+        <span>操作状态: <span id="status-text">就绪</span></span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="environment-section">
+      <h3>使用说明</h3>
+      <div class="environment-item">
+        <span>环境要求:</span>
+        <span class="status-good">yt-dlp + ffmpeg</span>
+      </div>
+      <div class="environment-item">
+        <span>操作系统:</span>
+        <span class="status-good">Windows/Linux/macOS</span>
+      </div>
+    </div>
+
+    <div class="instructions">
+      <h3>使用方法</h3>
+      <ul>
+        <li>1. 确保已安装 yt-dlp 和 ffmpeg</li>
+        <li>2. 在输入框中粘贴视频链接或输入 BV/AV 号</li>
+        <li>3. 选择所需的清晰度/音质</li>
+        <li>4. 点击"生成下载命令"按钮</li>
+        <li>5. 复制生成的命令并在终端中运行</li>
+      </ul>
+    </div>
+
+    <div class="input-section" style="margin-top: 20px;">
+      <label for="command">生成的命令:</label>
+      <input type="text" id="command" readonly placeholder="生成的下载命令将显示在这里">
+      <button id="copy-btn" style="margin-top: 10px; width: 100%;">复制命令</button>
+    </div>
+  </div>
+
+  <script>
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 下载按钮点击事件
+      document.getElementById('download-btn').addEventListener('click', generateCommand);
+      
+      // 复制按钮点击事件
+      document.getElementById('copy-btn').addEventListener('click', copyCommand);
+    });
+
+    // 生成下载命令
+    function generateCommand() {
+      const url = document.getElementById('url').value.trim();
+      const quality = document.getElementById('quality').value;
+      
+      if (!url) {
+        showNotification('请输入视频链接', 'error');
+        return;
+      }
+      
+      const downloadBtn = document.getElementById('download-btn');
+      downloadBtn.disabled = true;
+      downloadBtn.textContent = '生成中...';
+      
+      try {
+        const command = buildCommand(url, quality);
+        document.getElementById('command').value = command;
+        document.getElementById('status-text').textContent = '命令已生成';
+        document.getElementById('progress-fill').style.width = '100%';
+        showNotification('命令生成成功', 'success');
+      } catch (error) {
+        showNotification('命令生成失败: ' + error, 'error');
+      } finally {
+        downloadBtn.disabled = false;
+        downloadBtn.textContent = '生成下载命令';
+      }
+    }
+
+    // 构建下载命令
+    function buildCommand(url, quality) {
+      let command = 'yt-dlp ';
+      
+      // 设置输出格式
+      command += '-o "%(title)s.%(ext)s" ';
+      
+      // 设置质量
+      if (quality === '360p') {
+        command += '-f "bestvideo[height<=360]+bestaudio[abr<=128]/best[height<=360]" ';
+      } else if (quality === '480p') {
+        command += '-f "bestvideo[height<=480]+bestaudio[abr<=128]/best[height<=480]" ';
+      } else if (quality === '720p') {
+        command += '-f "bestvideo[height<=720]+bestaudio[abr<=192]/best[height<=720]" ';
+      } else if (quality === '1080p') {
+        command += '-f "bestvideo[height<=1080]+bestaudio[abr<=192]/best[height<=1080]" ';
+      } else if (quality === '仅音频 64k') {
+        command += '-f "bestaudio[abr<=64]" -x --audio-format mp3 ';
+      } else if (quality === '仅音频 128k') {
+        command += '-f "bestaudio[abr<=128]" -x --audio-format mp3 ';
+      }
+      
+      // 添加链接
+      command += '"' + url + '"';
+      
+      return command;
+    }
+
+    // 复制命令
+    function copyCommand() {
+      const commandInput = document.getElementById('command');
+      commandInput.select();
+      document.execCommand('copy');
+      showNotification('命令已复制到剪贴板', 'success');
+    }
+
+    // 显示通知
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
